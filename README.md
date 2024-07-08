@@ -1,0 +1,2 @@
+# About This Project
+I am building a CLI git-like version control system based off the high level description provided in this video: youtube.com/watch%3Fv%3D2sjqTHE0zok&sa=U&ved=2ahUKEwio2NH-uZiHAxV6xuYEHcaHBnAQz40FegQIDhAu&usg=AOvVaw0x_GEO6Avd4wD3jOs74ECs. This project is for learning purposes, I dont intend to follow the step by step process of building Git exactly as it is.
