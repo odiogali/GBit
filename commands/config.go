@@ -7,7 +7,7 @@ import (
 )
 
 func Config(args []string) {
-	readFile, err := os.Create("/home/odi/Desktop/GBit/config.txt")
+	readFile, err := os.Open("/home/odi/Desktop/GBit/config.txt")
 
 	if err != nil {
 		panic(err)
