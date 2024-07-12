@@ -1,12 +1,13 @@
 package main
 
 import (
+	"GBit/commands"
 	"flag"
 	"fmt"
 	"os"
 )
 
-var commandMap = map[string]func([]string){
+var commandsMap = map[string]func([]string){
 	"config": commands.Config,
 	"log":    commands.Log,
 	"help":   commands.Help,
@@ -24,13 +25,9 @@ var commandMap = map[string]func([]string){
 }
 
 func main() {
-	var message string
-	flag.StringVar(&message, "message", "", "commit message")
-	flag.StringVar(&message, "m", "", "commit message")
-
-	var version string
-	flag.StringVar(&version, "version", "", "version number")
-	flag.StringVar(&version, "v", "", "version number")
+	var version bool
+	flag.BoolVar(&version, "version", false, "version number")
+	flag.BoolVar(&version, "v", false, "version number")
 
 	flag.Parse()
 
@@ -41,7 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cmd, ok := commands[subcommand[0]]
+	cmd, ok := commandsMap[subcommand[0]]
 	if !ok {
 		fmt.Println(usage())
 		os.Exit(1)
@@ -49,12 +46,15 @@ func main() {
 
 	cmd(subcommand[1:])
 
-	fmt.Println("Message: ", message)
+	// if version {
+	// fmt.Println("GBit 1.0.0")
+	// os.Exit(1)
+	// }
 }
 
 func usage() string {
 	s := "Usage: gbit [command] [options]\nAvailable commands:\n"
-	for k := range commands {
+	for k := range commandsMap {
 		s += "-" + k + "\n"
 	}
 	return s

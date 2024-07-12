@@ -4,34 +4,34 @@ type readable interface {
 	isDir() bool
 }
 
-type user struct {
+type User struct {
 	name  string
 	email string
 }
 
-type blob struct { // blobs represent files
+type Blob struct { // blobs represent files
 	name     string
 	path     string
 	contents []byte
 }
 
-type tree struct { // trees represent folders / directories
+type Tree struct { // trees represent folders / directories
 	name     string
 	path     string
 	children []readable
 }
 
-type commit struct {
-	parents  []commit
+type Commit struct {
+	parents  []Commit
 	author   string
 	message  string
-	snapshot tree
+	snapshot Tree
 }
 
-func (b blob) isDir() bool {
+func (b Blob) isDir() bool {
 	return false
 }
 
-func (t tree) isDir() bool {
+func (t Tree) isDir() bool {
 	return true
 }
