@@ -1,60 +1,71 @@
 package commands
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 )
 
-func Config(args []string) {
-	readFile, err := os.Open("/home/odi/Desktop/GBit/config.txt")
+type User struct {
+	Name  string
+	Email string
+}
 
+func Config(args []string) {
+	file, err := os.OpenFile("config.json", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0766)
 	if err != nil {
 		panic(err)
 	}
-	fileScanner := bufio.NewScanner(readFile)
-	fileScanner.Split(bufio.ScanLines)
-	var fileLines []string
 
-	for fileScanner.Scan() {
-		fileLines = append(fileLines, fileScanner.Text())
+	fileInfo, err := os.Stat("config.json")
+	if err != nil {
+		panic(err)
 	}
 
-	readFile.Close()
+	defer file.Close()
+
+	if fileInfo.Size() == 0 {
+		if len(args) == 1 {
+			fmt.Println("Cannot obtain value: ", args[0])
+		} else if len(args) == 2 && args[0] == "user.email" {
+			u := User{"", args[1]}
+
+			info, err := json.Marshal(u)
+			if err != nil {
+				panic(err)
+			}
+
+			_, err = file.Write(info)
+			if err != nil {
+				panic(err)
+			}
+		} else if len(args) == 2 && args[0] == "user.name" {
+			u := User{args[1], ""}
+
+			info, err := json.Marshal(u)
+			if err != nil {
+				panic(err)
+			}
+
+			_, err = file.Write(info)
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			fmt.Println("Too many arguments were provided.")
+			return
+		}
+	}
 
 	if len(args) == 2 {
 		if args[0] == "user.name" {
-			fmt.Fprintln(readFile, args[1])
-			if len(fileLines) == 0 {
-				fmt.Fprintln(readFile, "")
-			} else {
-				fmt.Fprintln(readFile, fileLines[0])
-			}
 		} else if args[0] == "user.email" {
-			if len(fileLines) == 0 {
-				fmt.Fprintln(readFile, "")
-			} else {
-				fmt.Fprintln(readFile, fileLines[1])
-			}
-			fmt.Fprintln(readFile, args[1])
 		} else {
 			fmt.Println("Subcommand: ", args[0], " not supported.")
 		}
 	} else if len(args) == 1 {
 		if args[0] == "user.name" {
-			if len(fileLines) == 0 {
-				fmt.Println("User's name has not been specified.")
-			} else {
-				fmt.Println(fileLines[0])
-				os.Exit(1)
-			}
 		} else if args[0] == "user.email" {
-			if len(fileLines) == 0 {
-				fmt.Println("User's email has not been specified.")
-			} else {
-				fmt.Println(fileLines[1])
-				os.Exit(1)
-			}
 		} else {
 			fmt.Println("Subcommand: ", args[0], " not supported.")
 		}
@@ -62,5 +73,4 @@ func Config(args []string) {
 		fmt.Println("Invalid number of arguments.")
 	}
 
-	readFile.Close()
 }
