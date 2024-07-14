@@ -22,4 +22,5 @@ func Init(args []string) {
 		fmt.Println("Initialized empty GBit repository in ", folder)
 	}
 
+	// initialize necessary config files
 }
