@@ -9,19 +9,28 @@ type User struct {
 	Email string
 }
 
+const (
+	modified int = 1
+	staged       = 2
+	commited     = 3
+)
+
 type Blob struct { // blobs represent files
 	Name     string
 	Path     string
 	Contents []byte
+	state    int
 }
 
 type Tree struct { // trees represent folders / directories
 	Name     string
 	Path     string
 	Children []readable
+	state    int
 }
 
 type Commit struct {
+	Ref      string
 	Parents  []Commit
 	Author   string
 	Message  string

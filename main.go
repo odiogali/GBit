@@ -16,8 +16,6 @@ var commandsMap = map[string]func([]string){
 	"diff":   commands.Diff,
 	"rm":     commands.Remove,
 	"mv":     commands.Move,
-	"branch": commands.Branch,
-	"merge":  commands.Merge,
 	"pull":   commands.Pull,
 	"push":   commands.Push,
 	"blame":  commands.Blame,
