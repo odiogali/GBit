@@ -6,11 +6,6 @@ import (
 	"os"
 )
 
-type User struct {
-	Name  string
-	Email string
-}
-
 func Config(args []string) {
 	file, err := os.OpenFile("config.json", os.O_CREATE|os.O_RDWR, 0766)
 	if err != nil {

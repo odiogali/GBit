@@ -1,31 +1,31 @@
-package main
+package commands
 
 type readable interface {
 	isDir() bool
 }
 
 type User struct {
-	name  string
-	email string
+	Name  string
+	Email string
 }
 
 type Blob struct { // blobs represent files
-	name     string
-	path     string
-	contents []byte
+	Name     string
+	Path     string
+	Contents []byte
 }
 
 type Tree struct { // trees represent folders / directories
-	name     string
-	path     string
-	children []readable
+	Name     string
+	Path     string
+	Children []readable
 }
 
 type Commit struct {
-	parents  []Commit
-	author   string
-	message  string
-	snapshot Tree
+	Parents  []Commit
+	Author   string
+	Message  string
+	Snapshot Tree
 }
 
 func (b Blob) isDir() bool {

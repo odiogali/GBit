@@ -25,11 +25,15 @@ var commandsMap = map[string]func([]string){
 }
 
 func main() {
-	var version bool
-	flag.BoolVar(&version, "version", false, "version number")
-	flag.BoolVar(&version, "v", false, "version number")
+	version := flag.Bool("version", false, "print the version number of GBit")
+	v := flag.Bool("v", false, "also print the version number of GBit")
 
 	flag.Parse()
+
+	if *version || *v {
+		fmt.Println("GBit 1.0.0")
+		os.Exit(1)
+	}
 
 	subcommand := flag.Args()
 
@@ -45,11 +49,6 @@ func main() {
 	}
 
 	cmd(subcommand[1:])
-
-	// if version {
-	// fmt.Println("GBit 1.0.0")
-	// os.Exit(1)
-	// }
 }
 
 func usage() string {
