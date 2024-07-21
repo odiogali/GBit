@@ -52,6 +52,8 @@ func Add(args []string) {
 				defer file.Close()
 				os.Chdir(wd) // no error handling beccause we know 'wd' exists
 				// WARNING: Still need to write to the file
+				freq := countFreq(dat)
+				fmt.Println(freq)
 			}
 
 		}
@@ -84,6 +86,8 @@ func Add(args []string) {
 				defer file.Close()
 				os.Chdir(wd) // no error handling beccause we know 'wd' exists
 				// WARNING: Still need to write to the file
+				freq := countFreq(dat)
+				fmt.Println(freq)
 			}
 		}
 	}
@@ -94,4 +98,42 @@ func hash(fileContents []byte) []byte {
 	h.Write(fileContents)
 	bs := h.Sum(nil)
 	return bs
+}
+
+func countFreq(data []byte) map[string]int {
+	freq := make(map[string]int)
+	for _, letter := range data {
+		// Count number of occurences
+		letterAsString := string(letter)
+		num, exists := freq[letterAsString]
+		if !exists {
+			freq[letterAsString] = 1
+		} else {
+			freq[letterAsString] = num + 1
+		}
+	}
+	return freq
+}
+
+type node struct {
+	left      huffEntity
+	right     huffEntity
+	frequency int
+}
+
+type leaf struct {
+	character string
+	frequency int
+}
+
+type huffEntity interface {
+	isLeaf() bool
+}
+
+func (n node) isLeaf() bool {
+	return false
+}
+
+func (l leaf) isLeaf() bool {
+	return true
 }
