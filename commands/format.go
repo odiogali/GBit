@@ -16,10 +16,9 @@ const (
 )
 
 type Blob struct { // blobs represent files
-	Name     string
-	Path     string
-	Contents []byte
-	state    int
+	Name  string
+	Path  string
+	state int
 }
 
 type Tree struct { // trees represent folders / directories
