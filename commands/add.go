@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-var huffCodes map[string]string
+var huffCodes = make(map[string]string)
 
 func Add(args []string) {
 	// what happens when we call 'add' and not in GBit repository
@@ -60,7 +60,8 @@ func Add(args []string) {
 				os.Chdir(wd)
 				// WARNING: Still need to write to the file
 				freq := countFreq(dat)
-				encodedText, tree := encode(freq, dat)
+				_, _ = encode(freq, dat)
+				fmt.Println("This is huffCodes after all is said and done: ", huffCodes)
 			}
 
 		}
@@ -119,6 +120,7 @@ func countFreq(data []byte) map[string]int {
 			freq[letterAsString] = num + 1
 		}
 	}
+	fmt.Println("Should contain characters and their frequencies: ", freq)
 	return freq
 }
 
@@ -128,6 +130,7 @@ func encode(frequencies map[string]int, unencodedText []byte) (string, huffTree)
 		aLeaf := leaf{key, value, nil, nil}
 		huffEntities = append(huffEntities, aLeaf)
 	}
+	fmt.Println("Should contain just the leaves: ", huffEntities)
 
 	finalTree := huffTree{}     // there's no real reason for me to be using a huffTree struct here tbh
 	for len(huffEntities) > 1 { // Go doesn't have while loop lol
@@ -142,6 +145,8 @@ func encode(frequencies map[string]int, unencodedText []byte) (string, huffTree)
 		finalTree.root = newNode
 		huffEntities = append(huffEntities, newNode)
 	}
+	fmt.Println("Slice should have one value: ", huffEntities)
+	fmt.Println("Slice has one value: ", len(huffEntities) == 1)
 
 	generateHuffCodes(finalTree.root, "")
 
@@ -160,11 +165,12 @@ func getSmallestItem(arr []huffEntity) (huffEntity, []huffEntity) {
 	}
 
 	if index+1 == len(arr) {
-		arr = append(arr[:index])
+		arr = arr[:index]
 	} else {
 		arr = append(arr[:index], arr[index+1:]...)
 	}
 
+	fmt.Println("This is supposedly the smallest item: ", smallestItem, ". This is the slice without it: ", arr)
 	return smallestItem, arr
 }
 
@@ -184,7 +190,8 @@ func generateHuffCodes(entity huffEntity, huffcode string) {
 
 func getEncodedText(unencodedText []byte) string {
 	for _, item := range unencodedText {
-		char := string(item)
+		fmt.Println(string(item))
+		// char := string(item)
 		// NOTE: Use bit writer and append bit by bit
 	}
 	return "" // return the result
