@@ -87,9 +87,6 @@ func Add(args []string) {
 					panic(err)
 				}
 
-				// WARNING: testing decode function
-				Decode(asciiString, asciiString+".json")
-
 				os.Chdir(wd)
 			}
 
