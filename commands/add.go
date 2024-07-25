@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"github.com/icza/bitio"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 var huffCodes = make(map[string]string)
@@ -33,12 +35,69 @@ func Add(args []string) {
 		// Adds all files in working directory to necessary GBit directory
 		if args[0] == "." {
 
-			// WARNING: Need to walkthrough all files in working directory
+			err := filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					fmt.Println("Error walking through file at: ", path)
+					return err
+				}
+
+				if !strings.Contains(path, ".GBit") && !strings.Contains(path, ".git") {
+					huffCodes = make(map[string]string)
+					dat, _ := os.ReadFile(path)               // find, read, and store file contents
+					hashed := Hash(dat)                       // hash the file's contents
+					asciiString := hex.EncodeToString(hashed) // name of new file needs to be readable
+					hashedStringPath := objectsDir + "/" + asciiString
+
+					// if file does not already exist, create it and write to it
+					if _, err := os.Stat(hashedStringPath); os.IsNotExist(err) {
+						file, error := os.Create(hashedStringPath)
+						if error != nil {
+							fmt.Println("Create file error: ", error)
+						}
+
+						defer file.Close()
+
+						// Encode file contents
+						freq := countFreq(dat)
+						encodedText := encode(freq, dat)
+
+						// Write encoded text
+						if _, err := file.Write(encodedText); err != nil {
+							panic(err)
+						}
+
+						var codesStruct = JsonCodes{}
+						codesStruct = JsonCodes{huffCodes} // create struct for writing to json file
+						jsonData, err := json.Marshal(codesStruct)
+						if err != nil {
+							fmt.Printf("Failed to marshal: %s", args[0])
+						}
+
+						// create new json file and write to it
+						jsonFile, err := os.Create(objectsDir + "/" + asciiString + ".json")
+						if err != nil {
+							fmt.Println("Create error (json for decoding): ", error)
+							os.Exit(1)
+						}
+						if _, err = jsonFile.Write(jsonData); err != nil {
+							panic(err)
+						}
+
+					}
+				}
+
+				return nil
+
+			})
+
+			if err != nil {
+				panic(err)
+			}
 
 			os.Exit(0)
 		}
 
-		// Adds specified file to GBit repo
+		// Single argument is not ". " so we add specified file to GBit repo
 		dat, err := os.ReadFile(args[0]) // find, read, and store file contents
 		if err != nil {
 			fmt.Printf("fatal: pathspec '%s' did not match any files\n", args[0])
@@ -50,18 +109,12 @@ func Add(args []string) {
 		hashedStringPath := objectsDir + "/" + asciiString
 
 		// if file does not already exist, create it and write to it
-		error := os.Chdir(objectsDir)
-		if error != nil {
-			fmt.Println(error)
-			os.Exit(1)
-		}
-
-		_, error = os.Open(hashedStringPath)
+		_, error := os.Open(hashedStringPath)
 		if error == nil { // no need to add a file that has already been added
 			os.Exit(0)
 		}
 
-		file, error := os.Create(asciiString)
+		file, error := os.Create(hashedStringPath)
 		if error != nil {
 			fmt.Println("Error creating encoded file.")
 			os.Exit(1)
@@ -86,7 +139,7 @@ func Add(args []string) {
 		}
 
 		// create new json file and write to it
-		jsonFile, err := os.Create(asciiString + ".json")
+		jsonFile, err := os.Create(hashedStringPath + ".json")
 		if err != nil {
 			fmt.Println("Create error (json for decoding): ", error)
 			return
@@ -95,7 +148,6 @@ func Add(args []string) {
 			panic(err)
 		}
 
-		os.Chdir(wd)
 		os.Exit(0)
 	}
 
@@ -113,13 +165,7 @@ func Add(args []string) {
 
 		// if file does not already exist, create it and write to it
 		if _, err := os.Stat(hashedStringPath); os.IsNotExist(err) {
-			error := os.Chdir(objectsDir)
-			if error != nil {
-				fmt.Println(error)
-				os.Exit(1)
-			}
-
-			file, error := os.Create(asciiString)
+			file, error := os.Create(hashedStringPath)
 			if error != nil {
 				fmt.Println("Create file error: ", error)
 				return
@@ -144,16 +190,15 @@ func Add(args []string) {
 			}
 
 			// create new json file and write to it
-			jsonFile, err := os.Create(asciiString + ".json")
+			jsonFile, err := os.Create(hashedStringPath + ".json")
 			if err != nil {
 				fmt.Println("Create error (json for decoding): ", error)
-				return
+				os.Exit(1)
 			}
 			if _, err = jsonFile.Write(jsonData); err != nil {
 				panic(err)
 			}
 
-			os.Chdir(wd)
 		}
 	}
 
@@ -237,6 +282,10 @@ func getSmallestItem(arr []huffEntity) (huffEntity, []huffEntity) {
 }
 
 func generateHuffCodes(entity huffEntity, huffcode string) {
+	if entity == nil {
+		return
+	}
+
 	if entity.isLeaf() {
 		huffCodes[entity.(leaf).getChar()] = huffcode
 	}
