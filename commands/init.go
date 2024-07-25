@@ -30,8 +30,8 @@ func Init(args []string) {
 	}
 
 	// create folder where staged files will be stored
-	subDirStage := folder + "/stage"
-	err = os.Mkdir(subDirStage, 0755)
+	stagePath := folder + "/stage"
+	_, err = os.Create(stagePath)
 	if err != nil {
 		panic(err)
 	}

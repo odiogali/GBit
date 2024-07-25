@@ -35,6 +35,8 @@ func Add(args []string) {
 		// Adds all files in working directory to necessary GBit directory
 		if args[0] == "." {
 
+			var added []string
+
 			err := filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
 				if err != nil {
 					fmt.Println("Error walking through file at: ", path)
@@ -83,6 +85,8 @@ func Add(args []string) {
 							panic(err)
 						}
 
+						added = append(added, asciiString)
+
 					}
 				}
 
@@ -93,6 +97,15 @@ func Add(args []string) {
 			if err != nil {
 				panic(err)
 			}
+
+			stageFile, err := os.OpenFile(gbitSubDir+"/stage", os.O_APPEND|os.O_WRONLY, 0644)
+			if err != nil {
+				fmt.Println("Error opening staging file.")
+			}
+			for _, item := range added {
+				fmt.Fprintln(stageFile, item)
+			}
+			stageFile.Close()
 
 			os.Exit(0)
 		}
@@ -148,9 +161,18 @@ func Add(args []string) {
 			panic(err)
 		}
 
+		stage, err := os.OpenFile(gbitSubDir+"/stage", os.O_APPEND|os.O_WRONLY, 0644)
+		fmt.Println(gbitSubDir + "/stage")
+		if err != nil {
+			fmt.Println("Error opening staging file.")
+		}
+		fmt.Fprintln(stage, asciiString)
+		stage.Close()
+
 		os.Exit(0)
 	}
 
+	var added []string
 	// if number of arguments is not one
 	for _, item := range args {
 		huffCodes = make(map[string]string)
@@ -199,8 +221,19 @@ func Add(args []string) {
 				panic(err)
 			}
 
+			added = append(added, asciiString)
+
 		}
 	}
+
+	stage, err := os.OpenFile(gbitSubDir+"/stage", os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Error opening staging file.")
+	}
+	for _, item := range added {
+		fmt.Fprintln(stage, item)
+	}
+	stage.Close()
 
 }
 
