@@ -26,130 +26,137 @@ func Add(args []string) {
 	if len(args) == 0 {
 		fmt.Println("Nothing specified, nothing added.")
 		os.Exit(1)
-	} else if len(args) == 1 {
+	}
 
-		// Adds all files in working directory to necessary GBit repo
+	if len(args) == 1 {
+
+		// Adds all files in working directory to necessary GBit directory
 		if args[0] == "." {
 
 			// WARNING: Need to walkthrough all files in working directory
 
-		} else { // Just adds specified file to GBit repo
-
-			dat, err := os.ReadFile(args[0]) // find, read, and store file contents
-			if err != nil {
-				fmt.Printf("fatal: pathspec '%s' did not match any files\n", args[0])
-				os.Exit(1)
-			}
-
-			hashed := Hash(dat)                       // hash the file's contents
-			asciiString := hex.EncodeToString(hashed) // name of new file needs to be readable
-			hashedStringPath := objectsDir + "/" + asciiString
-
-			// if file does not already exist, create it and write to it
-			if _, err := os.Stat(hashedStringPath); os.IsNotExist(err) {
-				error := os.Chdir(objectsDir)
-				if error != nil {
-					fmt.Println(error)
-					os.Exit(1)
-				}
-
-				file, error := os.Create(asciiString)
-				if error != nil {
-					fmt.Println("Create error: ", error)
-					return
-				}
-
-				defer file.Close()
-
-				// Actually write to file
-				freq := countFreq(dat)
-				encodedText := encode(freq, dat)
-				// fmt.Println("This is huffCodes after all is said and done: ", huffCodes)
-
-				// Write encoded text
-				if _, err := file.Write(encodedText); err != nil {
-					panic(err)
-				}
-
-				var codesStruct = JsonCodes{huffCodes} // create struct for writing to json file
-				jsonData, err := json.Marshal(codesStruct)
-				if err != nil {
-					fmt.Printf("Failed to marshal: %s", args[0])
-				}
-
-				// create new json file and write to it
-				jsonFile, err := os.Create(asciiString + ".json")
-				if err != nil {
-					fmt.Println("Create error (json for decoding): ", error)
-					return
-				}
-				if _, err = jsonFile.Write(jsonData); err != nil {
-					panic(err)
-				}
-
-				os.Chdir(wd)
-			}
-
+			os.Exit(0)
 		}
 
-	} else { // if number of arguments is not one
-		for _, item := range args {
-			huffCodes = make(map[string]string)
-			dat, err := os.ReadFile(item) // find, read, and store file contents
-			if err != nil {
-				fmt.Printf("fatal: pathspec '%s' did not match any files\n", item)
+		// Adds specified file to GBit repo
+		dat, err := os.ReadFile(args[0]) // find, read, and store file contents
+		if err != nil {
+			fmt.Printf("fatal: pathspec '%s' did not match any files\n", args[0])
+			os.Exit(1)
+		}
+
+		hashed := Hash(dat)                       // hash the file's contents
+		asciiString := hex.EncodeToString(hashed) // name of new file needs to be readable
+		hashedStringPath := objectsDir + "/" + asciiString
+
+		// if file does not already exist, create it and write to it
+		error := os.Chdir(objectsDir)
+		if error != nil {
+			fmt.Println(error)
+			os.Exit(1)
+		}
+
+		_, error = os.Open(hashedStringPath)
+		if error == nil { // no need to add a file that has already been added
+			os.Exit(0)
+		}
+
+		file, error := os.Create(asciiString)
+		if error != nil {
+			fmt.Println("Error creating encoded file.")
+			os.Exit(1)
+		}
+
+		defer file.Close()
+
+		// Actually write to file
+		freq := countFreq(dat)
+		encodedText := encode(freq, dat)
+		// fmt.Println("This is huffCodes after all is said and done: ", huffCodes)
+
+		// Write encoded text
+		if _, err := file.Write(encodedText); err != nil {
+			panic(err)
+		}
+
+		var codesStruct = JsonCodes{huffCodes} // create struct for writing to json file
+		jsonData, err := json.Marshal(codesStruct)
+		if err != nil {
+			fmt.Printf("Failed to marshal: %s", args[0])
+		}
+
+		// create new json file and write to it
+		jsonFile, err := os.Create(asciiString + ".json")
+		if err != nil {
+			fmt.Println("Create error (json for decoding): ", error)
+			return
+		}
+		if _, err = jsonFile.Write(jsonData); err != nil {
+			panic(err)
+		}
+
+		os.Chdir(wd)
+		os.Exit(0)
+	}
+
+	// if number of arguments is not one
+	for _, item := range args {
+		huffCodes = make(map[string]string)
+		dat, err := os.ReadFile(item) // find, read, and store file contents
+		if err != nil {
+			fmt.Printf("fatal: pathspec '%s' did not match any files\n", item)
+			continue // I don't think execution halts after a bad filename
+		}
+		hashed := Hash(dat)                       // hash the file's contents
+		asciiString := hex.EncodeToString(hashed) // name of new file needs to be readable
+		hashedStringPath := objectsDir + "/" + asciiString
+
+		// if file does not already exist, create it and write to it
+		if _, err := os.Stat(hashedStringPath); os.IsNotExist(err) {
+			error := os.Chdir(objectsDir)
+			if error != nil {
+				fmt.Println(error)
 				os.Exit(1)
 			}
-			hashed := Hash(dat)                       // hash the file's contents
-			asciiString := hex.EncodeToString(hashed) // name of new file needs to be readable
-			hashedStringPath := objectsDir + "/" + asciiString
 
-			// if file does not already exist, create it and write to it
-			if _, err := os.Stat(hashedStringPath); os.IsNotExist(err) {
-				error := os.Chdir(objectsDir)
-				if error != nil {
-					fmt.Println(error)
-					os.Exit(1)
-				}
-
-				file, error := os.Create(asciiString)
-				if error != nil {
-					fmt.Println("Create file error: ", error)
-					return
-				}
-
-				defer file.Close()
-
-				// Actually write to file
-				freq := countFreq(dat)
-				encodedText := encode(freq, dat)
-
-				// Write encoded text
-				if _, err := file.Write(encodedText); err != nil {
-					panic(err)
-				}
-
-				var codesStruct = JsonCodes{}
-				codesStruct = JsonCodes{huffCodes} // create struct for writing to json file
-				jsonData, err := json.Marshal(codesStruct)
-				if err != nil {
-					fmt.Printf("Failed to marshal: %s", args[0])
-				}
-
-				// create new json file and write to it
-				jsonFile, err := os.Create(asciiString + ".json")
-				if err != nil {
-					fmt.Println("Create error (json for decoding): ", error)
-					return
-				}
-				if _, err = jsonFile.Write(jsonData); err != nil {
-					panic(err)
-				}
-
-				os.Chdir(wd)
+			file, error := os.Create(asciiString)
+			if error != nil {
+				fmt.Println("Create file error: ", error)
+				return
 			}
+
+			defer file.Close()
+
+			// Actually write to file
+			freq := countFreq(dat)
+			encodedText := encode(freq, dat)
+
+			// Write encoded text
+			if _, err := file.Write(encodedText); err != nil {
+				panic(err)
+			}
+
+			var codesStruct = JsonCodes{}
+			codesStruct = JsonCodes{huffCodes} // create struct for writing to json file
+			jsonData, err := json.Marshal(codesStruct)
+			if err != nil {
+				fmt.Printf("Failed to marshal: %s", args[0])
+			}
+
+			// create new json file and write to it
+			jsonFile, err := os.Create(asciiString + ".json")
+			if err != nil {
+				fmt.Println("Create error (json for decoding): ", error)
+				return
+			}
+			if _, err = jsonFile.Write(jsonData); err != nil {
+				panic(err)
+			}
+
+			os.Chdir(wd)
 		}
 	}
+
 }
 
 func Hash(fileContents []byte) []byte {
