@@ -1,2 +1,6 @@
 # About This Project
-I am building a CLI git-like version control system based off the high level description provided in the YouTube video "Version Control (Git)" by the Missing Semester. This project is for learning purposes, I dont intend to follow the step by step process of building Git exactly as it is. A lot of the practices I use come from [this website](https://dx13.co.uk/articles/2022/10/12/cli-tools-in-go-with-flag/), namely the CLI portion of the project.
+This project is a CLI git-like version control system based off the high level description provided in the YouTube video "Version Control (Git)" by the Missing Semester. T
+### Topics I Got to Explore Through This Project:
+- Huffman coding and lossless data encryption algorithms
+- Advanced IO: how to write single bits to a file as opposed to whole bytes
+- Encryption using SHA256 and the deterministic nature of hashing functions
