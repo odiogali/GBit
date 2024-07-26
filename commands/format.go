@@ -28,9 +28,9 @@ type Tree struct { // trees represent folders / directories
 	state    int
 }
 
-type Commit struct {
+type CommitEntity struct {
 	Ref       string
-	Parents   []Commit
+	Parents   []CommitEntity
 	TimeStamp []string
 	Author    string
 	Message   string
