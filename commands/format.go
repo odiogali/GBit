@@ -29,12 +29,13 @@ type Tree struct { // trees represent folders / directories
 }
 
 type CommitEntity struct {
-	Ref       string
-	Parents   []CommitEntity
-	TimeStamp []string
-	Author    string
-	Message   string
-	Snapshot  Tree
+	Ref      string
+	Parents  []CommitEntity
+	Time     []string
+	Objects  []string
+	Author   string
+	Message  string
+	Snapshot Tree
 }
 
 func (b Blob) isDir() bool {

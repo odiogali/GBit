@@ -10,16 +10,13 @@ import (
 var commandsMap = map[string]func([]string){
 	"config": commands.Config,
 	"log":    commands.Log,
-	"help":   commands.Help,
 	"init":   commands.Init,
 	"add":    commands.Add,
-	"diff":   commands.Diff,
 	"rm":     commands.Remove,
-	"mv":     commands.Move,
 	"pull":   commands.Pull,
 	"push":   commands.Push,
-	"blame":  commands.Blame,
 	"clone":  commands.Clone,
+	"commit": commands.Commit,
 }
 
 func main() {
