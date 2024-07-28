@@ -339,7 +339,7 @@ func getEncodedText(unencodedText []byte) []byte {
 	for _, item := range unencodedText {
 		char := string(item)
 		code := huffCodes[char]
-		// NOTE: Use bit writer and append bit by bit
+
 		for _, letter := range code {
 			if string(letter) == "1" {
 				_ = writer.WriteBool(true)

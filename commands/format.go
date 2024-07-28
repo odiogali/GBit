@@ -9,33 +9,29 @@ type User struct {
 	Email string
 }
 
-const (
-	modified int = 1
-	staged       = 2
-	commited     = 3
-)
-
 type Blob struct { // blobs represent files
-	Name  string
-	Path  string
-	state int
+	Name string
+	Path string
 }
 
 type Tree struct { // trees represent folders / directories
 	Name     string
-	Path     string
 	Children []readable
-	state    int
 }
 
 type CommitEntity struct {
-	Ref      string
-	Parents  []CommitEntity
-	Time     []string
-	Objects  []string
-	Author   string
-	Message  string
-	Snapshot Tree
+	Ref     string
+	Parents []string
+	Time    string
+	Objects []string
+	Author  User
+	Message string
+	// Snapshot Tree
+}
+
+type CommitDAG struct {
+	RootCommit string
+	Edges      []map[string][]string
 }
 
 func (b Blob) isDir() bool {
