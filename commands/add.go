@@ -43,7 +43,7 @@ func Add(args []string) {
 					return err
 				}
 
-				if !strings.Contains(path, ".GBit") && !strings.Contains(path, ".git") {
+				if !strings.Contains(path, ".GBit") && !strings.Contains(path, ".git") && !info.IsDir() {
 					huffCodes = make(map[string]string)
 					dat, _ := os.ReadFile(path)               // find, read, and store file contents
 					hashed := Hash(dat)                       // hash the file's contents
@@ -68,8 +68,8 @@ func Add(args []string) {
 							panic(err)
 						}
 
-						var codesStruct = JsonCodes{}
-						codesStruct = JsonCodes{huffCodes} // create struct for writing to json file
+						relPath, err := filepath.Rel(wd, path)
+						codesStruct := JsonCodes{relPath, huffCodes} // create struct for writing to json file
 						jsonData, err := json.Marshal(codesStruct)
 						if err != nil {
 							fmt.Printf("Failed to marshal: %s", args[0])
@@ -145,7 +145,8 @@ func Add(args []string) {
 			panic(err)
 		}
 
-		var codesStruct = JsonCodes{huffCodes} // create struct for writing to json file
+		relPath, _ := filepath.Rel(wd, wd+"/"+args[0])
+		var codesStruct = JsonCodes{relPath, huffCodes} // create struct for writing to json file
 		jsonData, err := json.Marshal(codesStruct)
 		if err != nil {
 			fmt.Printf("Failed to marshal: %s", args[0])
@@ -162,7 +163,6 @@ func Add(args []string) {
 		}
 
 		stage, err := os.OpenFile(gbitSubDir+"/stage", os.O_APPEND|os.O_WRONLY, 0644)
-		fmt.Println(gbitSubDir + "/stage")
 		if err != nil {
 			fmt.Println("Error opening staging file.")
 		}
@@ -204,8 +204,8 @@ func Add(args []string) {
 				panic(err)
 			}
 
-			var codesStruct = JsonCodes{}
-			codesStruct = JsonCodes{huffCodes} // create struct for writing to json file
+			relPath, _ := filepath.Rel(wd, wd+"/"+item)
+			codesStruct := JsonCodes{relPath, huffCodes} // create struct for writing to json file
 			jsonData, err := json.Marshal(codesStruct)
 			if err != nil {
 				fmt.Printf("Failed to marshal: %s", args[0])
@@ -418,6 +418,7 @@ func checkForValue(mapping map[string]string, searchValue string) (string, bool)
 }
 
 type JsonCodes struct {
+	Name  string
 	Codes map[string]string `json:"jsonCodes"`
 }
 
