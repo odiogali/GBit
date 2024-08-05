@@ -23,8 +23,8 @@ func Init(args []string) {
 	}
 
 	// will store logs of commands that have been run
-	subDirLogs := folder + "/logs"
-	err := os.Mkdir(subDirLogs, 0755)
+	logsFile := folder + "/logs"
+	_, err := os.Create(logsFile)
 	if err != nil {
 		panic(err)
 	}

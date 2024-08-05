@@ -18,6 +18,7 @@ func Commit(args []string) {
 	stagePath := gbitSubDir + "/stage"
 	commitsPath := gbitSubDir + "/commits"
 	dagPath := (commitsPath + "/DAG.json")
+	logsPath := gbitSubDir + "/logs"
 
 	if len(args) != 2 {
 		fmt.Println("Follow the convention: GBit commit -m <message>")
@@ -112,10 +113,32 @@ func Commit(args []string) {
 
 		dagFile.Close()
 
+		// Write to the 'logs' file that a commit has happened
+		if logFile, err := os.OpenFile(logsPath, os.O_APPEND|os.O_WRONLY, 0644); err == nil {
+
+			defer logFile.Close()
+			// To the log file, write: branch name, commitID, the word "commit", and some number of characters for commit message
+			_, err = logFile.WriteString("main " + commitName + " commit \"" + commitMessage + "\"")
+			if err != nil {
+				fmt.Println("Error writing to the log file.")
+				os.Exit(1)
+			}
+
+		} else {
+			fmt.Println("Error opening log file.")
+			os.Exit(1)
+		}
+
+		// clear stage file - delete it, then create it anew but empty
+		if _, err := os.Create(stagePath); err != nil {
+			fmt.Println("Error truncating the stage file.")
+			os.Exit(1)
+		}
+
 	}
 
-	// Deal with if file exists
-	if dagData, err := os.ReadFile(dagPath); err == nil {
+	// Deal with if DAG file exists
+	if _, err := os.ReadFile(dagPath); err == nil {
 
 	}
 }
