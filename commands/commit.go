@@ -5,10 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
-	// "path/filepath"
+	"strings"
 	"time"
 )
 
@@ -17,7 +16,6 @@ func Commit(args []string) {
 	gbitSubDir := wd + "/.GBit"
 	stagePath := gbitSubDir + "/stage"
 	commitsPath := gbitSubDir + "/commits"
-	dagPath := (commitsPath + "/DAG.json")
 	logsPath := gbitSubDir + "/logs"
 
 	if len(args) != 2 {
@@ -43,6 +41,11 @@ func Commit(args []string) {
 	var lines []string
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
+	}
+
+	if len(lines) == 0 {
+		fmt.Println("Staging area is empty, no commit is created.")
+		os.Exit(0)
 	}
 
 	var allObjects []string
@@ -72,73 +75,121 @@ func Commit(args []string) {
 	err = json.Unmarshal(jsonData, &userInfo)
 
 	// If DAG of commits does not already exist, we need to create it
-	if _, err = os.Stat(dagPath); errors.Is(err, os.ErrNotExist) {
+	commitsDir, err := os.Open(commitsPath)
+	if err != nil {
+		panic(err)
+	}
+	defer commitsDir.Close()
 
-		// Create the commit struct
-		noParents := make([]string, 0)
-		commit := CommitEntity{commitName, noParents, currentTime, allObjects, userInfo, commitMessage}
+	if commitInfo, err := commitsDir.Stat(); err == nil {
 
-		// Create file the particular commit will be stored in; write to it
-		commitFile, e := os.Create(commitsPath + "/" + commitName + ".json")
-		jsonData, err := json.Marshal(commit)
-		if err != nil {
-			fmt.Println("Unable to marshal json data that will store commit info.")
-			os.Exit(1)
-		}
-		_, err = commitFile.Write(jsonData)
-		if err != nil {
-			fmt.Println("Unable to write to JSON file that will store commit info.")
-			os.Exit(1)
-		}
-		commitFile.Close()
+		if commitInfo.Size() == 0 {
 
-		// Create the DAG
-		dagFile, e := os.Create(dagPath)
-		if e != nil {
-			fmt.Println("Commit file could not be created due to some error.")
-			os.Exit(1)
-		}
-		var dagEdges = make([]map[string][]string, 1)
-		dag := CommitDAG{commitName, dagEdges}
-		dagJson, err := json.Marshal(dag)
-		if err != nil {
-			fmt.Println("Unable to marshal JSON data for DAG used to store commit history.")
-			os.Exit(1)
-		}
-		_, err = dagFile.Write(dagJson)
-		if err != nil {
-			fmt.Println("Unable to write to DAG to JSON file that will store info about commit history.")
-			os.Exit(1)
-		}
+			// Create the commit struct
+			noParents := make([]string, 0)
+			commit := CommitEntity{commitName, noParents, currentTime, allObjects, userInfo, commitMessage}
 
-		dagFile.Close()
-
-		// Write to the 'logs' file that a commit has happened
-		if logFile, err := os.OpenFile(logsPath, os.O_APPEND|os.O_WRONLY, 0644); err == nil {
-
-			defer logFile.Close()
-			// To the log file, write: branch name, commitID, the word "commit", and some number of characters for commit message
-			_, err = logFile.WriteString("main " + commitName + " commit \"" + commitMessage + "\"")
+			// Create file the particular commit will be stored in; write to it
+			commitFile, err := os.Create(commitsPath + "/" + commitName + ".json")
+			jsonData, err := json.Marshal(commit)
 			if err != nil {
-				fmt.Println("Error writing to the log file.")
+				fmt.Println("Unable to marshal json data that will store commit info.")
+				os.Exit(1)
+			}
+			_, err = commitFile.Write(jsonData)
+			if err != nil {
+				fmt.Println("Unable to write to JSON file that will store commit info.")
+				os.Exit(1)
+			}
+			commitFile.Close()
+
+			// Write to the 'logs' file that a commit has happened
+			if logFile, err := os.OpenFile(logsPath, os.O_APPEND|os.O_WRONLY, 0644); err == nil {
+
+				defer logFile.Close()
+				// To the log file, write: branch name, commitID, the word "commit", commit message
+				_, err = logFile.WriteString("main " + commitName + " commit \"" + commitMessage + "\"\n")
+				if err != nil {
+					fmt.Println("Error writing to the log file.")
+					os.Exit(1)
+				}
+
+			} else {
+				fmt.Println("Error opening log file.")
 				os.Exit(1)
 			}
 
-		} else {
-			fmt.Println("Error opening log file.")
-			os.Exit(1)
-		}
+			// clear stage file - delete it, then create it anew but empty
+			if _, err := os.Create(stagePath); err != nil {
+				fmt.Println("Error truncating the stage file.")
+				os.Exit(1)
+			}
 
-		// clear stage file - delete it, then create it anew but empty
-		if _, err := os.Create(stagePath); err != nil {
-			fmt.Println("Error truncating the stage file.")
-			os.Exit(1)
+			os.Exit(0) // to avoid the next part running
 		}
 
 	}
 
 	// Deal with if DAG file exists
-	if _, err := os.ReadFile(dagPath); err == nil {
 
+	// Get the parents of this commit; if not on branch, we are on main branch; parent = latest main commit
+	var parentName = ""
+	logFile, err := os.Open(logsPath)
+	if err != nil {
+		panic(err)
 	}
+	defer logFile.Close()
+	scanner = bufio.NewScanner(logFile)
+	scanner.Split(bufio.ScanLines)
+	var logLines []string
+	for scanner.Scan() {
+		logLines = append(logLines, scanner.Text())
+	}
+	for i := len(logLines) - 1; i >= 0; i-- {
+		words := strings.Split(logLines[i], " ")
+		// words[0] - "main", [1] - name, [2] - "commit", [3] - commit message
+		if words[0] == "main" {
+			parentName = words[1]
+		}
+	}
+	var parents = make([]string, 1)
+	parents[0] = parentName
+	commit := CommitEntity{commitName, parents, currentTime, allObjects, userInfo, commitMessage}
+
+	// Create file the particular commit will be stored in; write to it
+	commitFile, err := os.Create(commitsPath + "/" + commitName + ".json")
+	jsonData, err = json.Marshal(commit)
+	if err != nil {
+		fmt.Println("Unable to marshal json data that will store commit info.")
+		os.Exit(1)
+	}
+	_, err = commitFile.Write(jsonData)
+	if err != nil {
+		fmt.Println("Unable to write to JSON file that will store commit info.")
+		os.Exit(1)
+	}
+	commitFile.Close()
+
+	// Write to the 'logs' file that a commit has happened
+	if logFile, err := os.OpenFile(logsPath, os.O_APPEND|os.O_WRONLY, 0644); err == nil {
+
+		defer logFile.Close()
+		// To the log file, write: branch name, commitID, "commit", and commit message
+		_, err = logFile.WriteString("main " + commitName + " commit \"" + commitMessage + "\"\n")
+		if err != nil {
+			fmt.Println("Error writing to the log file.")
+			os.Exit(1)
+		}
+
+	} else {
+		fmt.Println("Error opening log file.")
+		os.Exit(1)
+	}
+
+	// clear stage file - delete it, then create it anew but empty
+	if _, err := os.Create(stagePath); err != nil {
+		fmt.Println("Error truncating the stage file.")
+		os.Exit(1)
+	}
+
 }
