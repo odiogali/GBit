@@ -130,8 +130,6 @@ func Commit(args []string) {
 
 	}
 
-	// Deal with if DAG file exists
-
 	// Get the parents of this commit; if not on branch, we are on main branch; parent = latest main commit
 	var parentName = ""
 	logFile, err := os.Open(logsPath)
@@ -150,6 +148,7 @@ func Commit(args []string) {
 		// words[0] - "main", [1] - name, [2] - "commit", [3] - commit message
 		if words[0] == "main" {
 			parentName = words[1]
+			break
 		}
 	}
 	var parents = make([]string, 1)
