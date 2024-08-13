@@ -20,12 +20,13 @@ type Tree struct { // trees represent folders / directories
 }
 
 type CommitEntity struct {
-	Ref     string
-	Parents []string
-	Time    string
-	Objects []string
-	Author  User
-	Message string
+	Ref            string
+	Parents        []string
+	Time           string
+	AddedObjects   []string
+	RemovedObjects []string
+	Author         User
+	Message        string
 	// Snapshot Tree
 }
 

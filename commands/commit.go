@@ -87,7 +87,7 @@ func Commit(args []string) {
 
 			// Create the commit struct
 			noParents := make([]string, 0)
-			commit := CommitEntity{commitName, noParents, currentTime, allObjects, userInfo, commitMessage}
+			commit := CommitEntity{commitName, noParents, currentTime, allObjects, nil, userInfo, commitMessage}
 
 			// Create file the particular commit will be stored in; write to it
 			commitFile, err := os.Create(commitsPath + "/" + commitName + ".json")
@@ -153,7 +153,7 @@ func Commit(args []string) {
 	}
 	var parents = make([]string, 1)
 	parents[0] = parentName
-	commit := CommitEntity{commitName, parents, currentTime, allObjects, userInfo, commitMessage}
+	commit := CommitEntity{commitName, parents, currentTime, allObjects, nil, userInfo, commitMessage}
 
 	// Create file the particular commit will be stored in; write to it
 	commitFile, err := os.Create(commitsPath + "/" + commitName + ".json")

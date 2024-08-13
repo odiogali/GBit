@@ -10,7 +10,6 @@ import (
 var commandsMap = map[string]func([]string){
 	"config": commands.Config,
 	"branch": commands.Branch,
-	"log":    commands.Log,
 	"init":   commands.Init,
 	"add":    commands.Add,
 	"remove": commands.Remove,
