@@ -17,36 +17,40 @@ func Init(args []string) {
 	}
 
 	if err := os.Mkdir(folder, 0755); os.IsExist(err) {
+
+		if err = os.RemoveAll(folder); err != nil {
+			panic(err)
+		}
+
+		if err = os.Mkdir(folder, 0755); err != nil {
+			panic(err)
+		}
+
 		fmt.Println("Reinitialized existing GBit repository in ", wd)
 	} else if err == nil {
 		fmt.Println("Initialized empty GBit repository in ", folder)
 	}
 
-	// will store logs of commands that have been run
-	logsFile := folder + "/logs"
-	_, err := os.Create(logsFile)
-	if err != nil {
-		panic(err)
-	}
-
-	// create folder where staged files will be stored
-	stagePath := folder + "/stage"
-	_, err = os.Create(stagePath)
-	if err != nil {
-		panic(err)
-	}
-
-	// create record of commits
-	subDirCommits := folder + "/commits"
-	err = os.Mkdir(subDirCommits, 0755)
-	if err != nil {
-		panic(err)
-	}
-
 	// create folder 'objects'
 	subDirObjects := folder + "/objects"
-	err = os.Mkdir(subDirObjects, 0755)
+	err := os.Mkdir(subDirObjects, 0755)
 	if err != nil {
 		panic(err)
 	}
+
+	subDirRefs := folder + "/refs"
+	err = os.Mkdir(subDirRefs, 0755)
+	if err != nil {
+		panic(err)
+	}
+
+	headFileName := folder + "/HEAD"
+	headFilePtr, err := os.Create(headFileName)
+	if err != nil {
+		panic(err)
+	}
+
+	headFilePtr.Write([]byte("ref: refs/heads/main\n"))
+	headFilePtr.Close()
+
 }
