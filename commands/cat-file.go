@@ -32,7 +32,8 @@ func CatFile(args []string) {
 	// Open and read file
 	byteContents, err := os.ReadFile(fileLocation)
 	if err != nil {
-		panic(err)
+		fmt.Println("The file you have specified doesn't exist.")
+		os.Exit(1)
 	}
 
 	// Decompress contents of the file
