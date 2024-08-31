@@ -8,16 +8,19 @@ import (
 )
 
 var commandsMap = map[string]func([]string){
-	"config": commands.Config,
-	"branch": commands.Branch,
-	"init":   commands.Init,
-	"add":    commands.Add,
-	"remove": commands.Remove,
-	"pull":   commands.Pull,
-	"push":   commands.Push,
-	"clone":  commands.Clone,
-	"commit": commands.Commit,
-	"merge":  commands.Merge,
+	"cat-file":    commands.CatFile,
+	"hash-object": commands.HashObject,
+	"ls-tree":     commands.LsTree,
+	"config":      commands.Config,
+	"branch":      commands.Branch,
+	"init":        commands.Init,
+	"add":         commands.Add,
+	"remove":      commands.Remove,
+	"pull":        commands.Pull,
+	"push":        commands.Push,
+	"clone":       commands.Clone,
+	"commit":      commands.Commit,
+	"merge":       commands.Merge,
 }
 
 func main() {

@@ -32,7 +32,8 @@ func CatFile(args []string) {
 
 	// Navigate to the object - it will be in .GBit/objects/{__}/{SHA}
 	firstTwoLetters := args[1][:2]
-	fileLocation := gbitSubDir + "/objects/" + firstTwoLetters + "/" + args[1]
+	restOfName := args[1][2:]
+	fileLocation := gbitSubDir + "/objects/" + firstTwoLetters + "/" + restOfName
 
 	// Open and read file
 	byteContents, err := os.ReadFile(fileLocation)

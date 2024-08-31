@@ -53,8 +53,10 @@ func HashObject(args []string) {
 	fmt.Println(hashedString)
 
 	// Get the first two letters of the hash string and check if a folder of that name already exists
+	var fileLocation string
 	firstTwoLetters := hashedString[:2]
-	fileLocation := objectsDir + "/" + firstTwoLetters
+	restOfName := hashedString[2:]
+	fileLocation = objectsDir + "/" + firstTwoLetters + "/"
 	// If the folder exists, and wFlag is true, then put our new file there, else, create it and then put our new file there
 	if !wFlag {
 		os.Exit(0)
@@ -62,14 +64,14 @@ func HashObject(args []string) {
 	var file *os.File
 	if err := os.Mkdir(fileLocation, 0755); os.IsExist(err) || err == nil {
 		// folder: /objects/__ exists already or its been created
-		file, err = os.Create(fileLocation + "/" + hashedString)
+		file, err = os.Create(fileLocation + "/" + restOfName)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
 	} else {
-		fmt.Println("Error creating directory.")
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
