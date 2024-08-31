@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func CatFile(args []string) {
@@ -49,8 +51,35 @@ func CatFile(args []string) {
 		r.Close()
 		os.Exit(1)
 	}
-	io.Copy(os.Stdout, r)
-	fmt.Println()
+	buf := new(strings.Builder)
+	io.Copy(buf, r)
+	bufToString := buf.String()
+	splitContents := strings.Split(bufToString, " ")
+
+	startFrom := 0
+	for i, char := range splitContents[1] { // iterate through the characters of the second item of split content
+		if _, err = strconv.Atoi(string(char)); err != nil {
+			startFrom = i
+			break
+		}
+	}
+
+	var res strings.Builder
+	for i := range splitContents { // iterate through the characters of the second item of split content
+		if i == 0 {
+			continue
+		}
+
+		if i == 1 {
+			res.WriteString(splitContents[1][startFrom:])
+			continue
+		}
+
+		res.WriteString(splitContents[i])
+	}
+
+	fmt.Println(res.String())
+
 	r.Close()
 
 	// For writing compressed content to file if ever necessary

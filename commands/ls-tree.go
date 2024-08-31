@@ -63,6 +63,11 @@ func LsTree(args []string) {
 	stringContents := buf.String()
 	splitContents := strings.Split(stringContents, " ")
 
+	if splitContents[0] != "tree" {
+		fmt.Println("Specified object is not a tree.")
+		os.Exit(1)
+	}
+
 	// nameOnly flag is false
 	var entryBuf strings.Builder
 	var found int = 0
