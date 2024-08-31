@@ -71,11 +71,11 @@ func CatFile(args []string) {
 		}
 
 		if i == 1 {
-			res.WriteString(splitContents[1][startFrom:])
+			res.WriteString(splitContents[1][startFrom:] + " ")
 			continue
 		}
 
-		res.WriteString(splitContents[i])
+		res.WriteString(splitContents[i] + " ")
 	}
 
 	fmt.Println(res.String())
