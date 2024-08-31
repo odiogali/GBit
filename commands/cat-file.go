@@ -20,14 +20,19 @@ func CatFile(args []string) {
 		os.Exit(1)
 	}
 
-	if len(args) != 1 {
-		fmt.Println("You must only pass in one SHA-1 name.")
+	if len(args) != 2 {
+		fmt.Println("Invalid number of arguments.")
+		os.Exit(1)
+	}
+
+	if args[0] != "-p" {
+		fmt.Println("Invalid arguments: ", args[0], args[1])
 		os.Exit(1)
 	}
 
 	// Navigate to the object - it will be in .GBit/objects/{__}/{SHA}
-	firstTwoLetters := args[0][:2]
-	fileLocation := gbitSubDir + "/objects/" + firstTwoLetters + "/" + args[0]
+	firstTwoLetters := args[1][:2]
+	fileLocation := gbitSubDir + "/objects/" + firstTwoLetters + "/" + args[1]
 
 	// Open and read file
 	byteContents, err := os.ReadFile(fileLocation)
