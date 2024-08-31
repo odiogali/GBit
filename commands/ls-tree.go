@@ -53,13 +53,7 @@ func LsTree(args []string) {
 		os.Exit(1)
 	}
 
-	if !nameOnly {
-		io.Copy(os.Stdout, r)
-		fmt.Println()
-		os.Exit(0)
-	}
-
-	// nameOnly is true
+	// Get file contents in a string format
 	buf := new(strings.Builder)
 	_, err = io.Copy(buf, r)
 	if err != nil {
@@ -68,7 +62,49 @@ func LsTree(args []string) {
 	}
 	stringContents := buf.String()
 	splitContents := strings.Split(stringContents, " ")
+
+	// nameOnly flag is false
+	var entryBuf strings.Builder
 	var found int = 0
+	if !nameOnly {
+		for i := 0; i < len(splitContents); i++ {
+			if i < 1 { // Ignore the [0]'th entry
+				continue
+			}
+
+			if i == 1 { // We need to get the last 6 letters of the [1]'st entry
+				res := string(splitContents[i][len(splitContents[i])-6:])
+				_, err = entryBuf.WriteString(res + " ")
+
+				if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
+				continue
+			}
+
+			if i == (4+(found*3))-1 { // formula for the entries containing the names
+				entryBuf.WriteString(splitContents[i][:41] + "\t")
+				entryBuf.WriteString(splitContents[i][41:] + " ")
+				fmt.Println(entryBuf.String())
+				entryBuf.Reset()
+				found++
+				continue
+			}
+
+			_, err = entryBuf.WriteString(splitContents[i] + " ")
+
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+
+		}
+		os.Exit(0)
+	}
+
+	// nameOnly is true
+	found = 0
 	for i := 0; i < len(splitContents); i++ {
 		if i == (4+(found*3))-1 { // formula for the entries containing the names
 			fmt.Println(splitContents[i][41:])
