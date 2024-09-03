@@ -73,6 +73,7 @@ func LsTree(args []string) {
 	var found int = 0
 	if !nameOnly {
 		for i := 0; i < len(splitContents); i++ {
+			//fmt.Println(splitContents[i])
 			if i < 1 { // Ignore the [0]'th entry
 				continue
 			}
@@ -89,8 +90,9 @@ func LsTree(args []string) {
 			}
 
 			if i == (4+(found*3))-1 { // formula for the entries containing the names
-				entryBuf.WriteString(splitContents[i][:41] + "\t")
-				entryBuf.WriteString(splitContents[i][41:] + " ")
+				border := len(splitContents[i]) - 40
+				entryBuf.WriteString(splitContents[i][border:] + "\t")
+				entryBuf.WriteString(splitContents[i][:border] + " ")
 				fmt.Println(entryBuf.String())
 				entryBuf.Reset()
 				found++
@@ -112,7 +114,8 @@ func LsTree(args []string) {
 	found = 0
 	for i := 0; i < len(splitContents); i++ {
 		if i == (4+(found*3))-1 { // formula for the entries containing the names
-			fmt.Println(splitContents[i][41:])
+			border := len(splitContents[i]) - 40
+			fmt.Println(splitContents[i][:border])
 			found++
 		}
 	}
