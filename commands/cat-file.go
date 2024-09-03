@@ -56,6 +56,11 @@ func CatFile(args []string) {
 	bufToString := buf.String()
 	splitContents := strings.Split(bufToString, " ")
 
+	if splitContents[0] == "tree" {
+		fmt.Println("The specified object is not a blob.")
+		os.Exit(1)
+	}
+
 	startFrom := 0
 	for i, char := range splitContents[1] { // iterate through the characters of the second item of split content
 		if _, err = strconv.Atoi(string(char)); err != nil {
@@ -78,7 +83,9 @@ func CatFile(args []string) {
 		res.WriteString(splitContents[i] + " ")
 	}
 
-	fmt.Println(res.String())
+	fmt.Println()
+	fmt.Printf(res.String())
+	fmt.Println()
 
 	r.Close()
 

@@ -64,7 +64,7 @@ func HashObject(args []string) {
 	var file *os.File
 	if err := os.Mkdir(fileLocation, 0755); os.IsExist(err) || err == nil {
 		// folder: /objects/__ exists already or its been created
-		file, err = os.Create(fileLocation + "/" + restOfName)
+		file, err = os.OpenFile(fileLocation+"/"+restOfName, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
