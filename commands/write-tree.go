@@ -64,7 +64,7 @@ func WriteTree(args []string) {
 
 		}
 
-		fmt.Println("Walk entry: ", entry.String())
+		// fmt.Println("Walk entry: ", entry.String())
 
 		entry.Reset()
 
@@ -76,11 +76,6 @@ func WriteTree(args []string) {
 	}
 
 	//fmt.Println(entries)
-
-	var header string
-	header = "tree " + strconv.Itoa(totalSize) + "\000"
-
-	fmt.Println(header)
 }
 
 // Recursively create tree objects returning the name of the tree; path is always a directory
@@ -89,7 +84,7 @@ func hashTree(path string) string {
 		return "" // return nothing, doing nothing
 	}
 
-	fmt.Println("hash tree dir call for: ", path)
+	// fmt.Println("hash tree dir call for: ", path)
 	var hashedTreeIdentifier string
 
 	// Get children of directory
@@ -115,7 +110,7 @@ func hashTree(path string) string {
 			continue
 		}
 
-		fmt.Printf("Child of %s: %s\n", path, info.Name())
+		//fmt.Printf("Child of %s: %s\n", path, info.Name())
 		if info.IsDir() {
 			if strings.Contains(path+"/"+item.Name(), ".GBit") || strings.Contains(path+"/"+item.Name(), ".git") {
 				// If we come across any hidden files, skip over them
@@ -154,7 +149,7 @@ func hashTree(path string) string {
 
 // Create, compress and writes the tree data after the hash has been created
 func createTree(treeContent string) string {
-	fmt.Println("Create tree for this content: ", treeContent)
+	//fmt.Println("Create tree for this content: ", treeContent)
 	wd, _ := os.Getwd()
 	objectsDir := wd + "/.GBit/objects"
 
@@ -180,7 +175,7 @@ func createTree(treeContent string) string {
 		file, err = os.OpenFile(fileLocation+"/"+restOfName, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
 		if err != nil && !strings.Contains(err.Error(), "file exists") {
 			fmt.Println(err)
-			os.Exit(2)
+			os.Exit(1)
 		} else if err != nil && strings.Contains(err.Error(), "file exists") {
 			return hashedString
 		}
