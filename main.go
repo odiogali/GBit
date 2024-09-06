@@ -22,6 +22,7 @@ var commandsMap = map[string]func([]string){
 	"commit":      commands.Commit,
 	"merge":       commands.Merge,
 	"write-tree":  commands.WriteTree,
+	"commit-tree": commands.CommitTree,
 }
 
 func main() {
